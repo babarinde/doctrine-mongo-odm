@@ -1,5 +1,5 @@
 {
-  "name": "helderjs/doctrine-mongo-odm",
+  "name": "babarinde/doctrine-mongo-odm",
   "description": "DoctrineMongoODM component for (Micro-)Framework",
   "type": "library",
   "license": "MIT",
@@ -17,6 +17,10 @@
     {
       "name": "Helder Santana",
       "email": "contato@heldersantana.net"
+    },
+    {
+      "name": "Babarinde Odewumi",
+      "email": "odewumibabarinde@abbaandking.com"
     }
   ],
   "require": {
