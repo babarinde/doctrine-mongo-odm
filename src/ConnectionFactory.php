@@ -11,6 +11,7 @@ namespace Helderjs\Component\DoctrineMongoODM;
 use Doctrine\MongoDB\Connection;
 use Doctrine\ODM\MongoDB\Configuration;
 use Helderjs\Component\DoctrineMongoODM\Exception\InvalidConfigException;
+use MongoDB\Client;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -31,7 +32,7 @@ class ConnectionFactory extends AbstractFactory
             $options = $this->getDoctrineConfiguration($container, 'connection');
 
             if (empty($options)) {
-                return new Connection();
+                return new Client('mongodb://127.0.0.1', []);
             }
 
             $connectionString = isset($options['connection_string'])
@@ -62,17 +63,7 @@ class ConnectionFactory extends AbstractFactory
                 }
             }
 
-            $configuration = null;
-            if ($container->has(Configuration::class)) {
-                /** @var $configuration \Doctrine\ODM\MongoDB\Configuration */
-                $configuration = $container->get(Configuration::class);
-                // Set defaultDB to $dbName, if it's not defined in configuration
-                if (null === $configuration->getDefaultDB()) {
-                    $configuration->setDefaultDB($dbName);
-                }
-            }
-
-            return new Connection($connectionString, $options['options'], $configuration);
+            return new Client($connectionString, $options['options']);
         } catch (\Exception $e) {
             throw new InvalidConfigException($e->getMessage());
         }

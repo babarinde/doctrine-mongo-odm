@@ -12,6 +12,7 @@ use Doctrine\MongoDB\Connection;
 use Doctrine\ODM\MongoDB\Configuration;
 use Helderjs\Component\DoctrineMongoODM\ConnectionFactory;
 use Helderjs\Component\DoctrineMongoODM\Exception\InvalidConfigException;
+use MongoDB\Client;
 use Psr\Container\ContainerInterface;
 
 class ConnectionFactoryTest extends \PHPUnit_Framework_TestCase
@@ -33,19 +34,19 @@ class ConnectionFactoryTest extends \PHPUnit_Framework_TestCase
         $this->container->has('doctrine')->willReturn(false);
         $this->container->has('config')->willReturn(false);
         $connection = $factory($this->container->reveal());
-        $this->assertInstanceOf(Connection::class, $connection);
+        $this->assertInstanceOf(Client::class, $connection);
 
         $this->container->has('doctrine')->willReturn(true);
         $this->container->get('doctrine')->willReturn([]);
         $this->container->has('config')->willReturn(false);
         $connection = $factory($this->container->reveal());
-        $this->assertInstanceOf(Connection::class, $connection);
+        $this->assertInstanceOf(Client::class, $connection);
 
         $this->container->has('doctrine')->willReturn(false);
         $this->container->has('config')->willReturn(true);
         $this->container->get('config')->willReturn([]);
         $connection = $factory($this->container->reveal());
-        $this->assertInstanceOf(Connection::class, $connection);
+        $this->assertInstanceOf(Client::class, $connection);
     }
 
     public function testCallingFactoryWithEmptyDoctrineConfig()
@@ -57,17 +58,18 @@ class ConnectionFactoryTest extends \PHPUnit_Framework_TestCase
         $this->container->get('config')->willReturn(['doctrine' => []]);
         $connection = $factory($this->container->reveal());
 
-        $this->assertInstanceOf(Connection::class, $connection);
+        $this->assertInstanceOf(Client::class, $connection);
     }
 
-    public function testCallingFactoryWithWrongDoctrineConfig()
+    public function testCallingFactoryWithNoConnectionConfig()
     {
         $factory = new ConnectionFactory();
 
+        $this->container->has('doctrine')->willReturn(false);
         $this->container->has('config')->willReturn(true);
         $this->container->get('config')->willReturn(['doctrine' => ['connection' => []]]);
-        $this->expectException(InvalidConfigException::class);
-        $factory($this->container->reveal());
+        $connection = $factory($this->container->reveal());
+        $this->assertInstanceOf(Client::class, $connection);
     }
 
     public function testCallingFactoryWithMissingDoctrineConfig()
@@ -84,7 +86,7 @@ class ConnectionFactoryTest extends \PHPUnit_Framework_TestCase
         ];
 
         $factory = new ConnectionFactory();
-
+        $this->container->has('doctrine')->willReturn(false);
         $this->container->has('config')->willReturn(true);
         $this->container->get('config')->willReturn($options);
         $this->expectException(InvalidConfigException::class);
@@ -111,11 +113,9 @@ class ConnectionFactoryTest extends \PHPUnit_Framework_TestCase
         $this->container->has('doctrine')->willReturn(false);
         $this->container->has('config')->willReturn(true);
         $this->container->get('config')->willReturn($options);
-        $this->container->has(Configuration::class)->willReturn(true);
-        $this->container->get(Configuration::class)->willReturn($configuration->reveal());
         $connection = $factory($this->container->reveal());
 
-        $this->assertInstanceOf(Connection::class, $connection);
+        $this->assertInstanceOf(Client::class, $connection);
     }
 
     public function testCallingFactoryWithDoctrineConfigParams()
@@ -139,17 +139,14 @@ class ConnectionFactoryTest extends \PHPUnit_Framework_TestCase
             ],
         ];
 
-        $configuration = $this->prophesize(Configuration::class);
         $factory = new ConnectionFactory();
 
         $this->container->has('doctrine')->willReturn(false);
         $this->container->has('config')->willReturn(true);
         $this->container->get('config')->willReturn($options);
-        $this->container->has(Configuration::class)->willReturn(true);
-        $this->container->get(Configuration::class)->willReturn($configuration->reveal());
         $connection = $factory($this->container->reveal());
 
-        $this->assertInstanceOf(Connection::class, $connection);
+        $this->assertInstanceOf(Client::class, $connection);
     }
 
     public function testCallingFactoryWithDoctrineWithoutConfigurationClass()
@@ -181,7 +178,7 @@ class ConnectionFactoryTest extends \PHPUnit_Framework_TestCase
         $this->container->has(Configuration::class)->willReturn(false);
         $connection = $factory($this->container->reveal());
 
-        $this->assertInstanceOf(Connection::class, $connection);
+        $this->assertInstanceOf(Client::class, $connection);
     }
 
     public function testCallingFactoryWithTwoDoctrineConfig()
@@ -216,24 +213,21 @@ class ConnectionFactoryTest extends \PHPUnit_Framework_TestCase
         $this->container->has('doctrine')->willReturn(false);
         $this->container->has('config')->willReturn(true);
         $this->container->get('config')->willReturn($options1);
-        $this->container->has(Configuration::class)->willReturn(false);
         /**
-         * @var Connection $connection1
+         * @var Client $connection1
          */
         $connection1 = $factory1($this->container->reveal());
 
         $this->container->has('doctrine')->willReturn(false);
-        $this->container->get('doctrine')->willReturn($options2);
+        $this->container->get('config')->willReturn($options2);
         $this->container->has('config')->willReturn(false);
-        $this->container->has(Configuration::class)->willReturn(false);
         /**
-         * @var Connection $connection2
+         * @var Client $connection2
          */
         $connection2 = $factory2($this->container->reveal());
 
-        $this->assertInstanceOf(Connection::class, $connection1);
-        $this->assertInstanceOf(Connection::class, $connection2);
+        $this->assertInstanceOf(Client::class, $connection1);
+        $this->assertInstanceOf(Client::class, $connection2);
         $this->assertNotSame($connection1, $connection2);
-        $this->assertNotSame($connection1->getConfiguration(), $connection2->getConfiguration());
     }
 }
