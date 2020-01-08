@@ -52,12 +52,6 @@ class ConfigurationFactory extends AbstractFactory
                 ? $container->get($options['metadata_cache'])
                 : new ArrayCache();
             $config->setMetadataCacheImpl($metadataCache);
-            // retries
-            $config->setRetryConnect(
-                isset($options['retry_connect']) ? $options['retry_connect'] : 0
-            );
-            $config->setRetryQuery(isset($options['retry_query']) ? $options['retry_query'] : 0);
-            // the driver
             $config->setMetadataDriverImpl($container->get($options['driver']));
             // metadataFactory, if set
             if (isset($options['metadata_factory_name'])) {
@@ -78,12 +72,6 @@ class ConfigurationFactory extends AbstractFactory
                         Type::addType($name, $class);
                     }
                 }
-            }
-            // logger
-            if (isset($options['logger'])) {
-                $logger = is_callable($options['logger']) ? $options['logger']
-                    : $container->get($options['logger']);
-                $config->setLoggerCallable([$logger, 'log']);
             }
         } catch (\Exception $e) {
             throw new InvalidConfigException($e->getMessage());

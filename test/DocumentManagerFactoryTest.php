@@ -14,8 +14,11 @@ use Doctrine\ODM\MongoDB\Configuration;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadataFactory;
 use Doctrine\ODM\MongoDB\Repository\DefaultRepositoryFactory;
+use Doctrine\ODM\MongoDB\Repository\RepositoryFactory;
 use Helderjs\Component\DoctrineMongoODM\DocumentManagerFactory;
 use Helderjs\Component\DoctrineMongoODM\Exception\InvalidConfigException;
+use MongoDB\Client;
+use ProxyManager\Factory\LazyLoadingGhostFactory;
 use Psr\Container\ContainerInterface;
 
 class DocumentManagerFactoryTest extends \PHPUnit_Framework_TestCase
@@ -58,7 +61,7 @@ class DocumentManagerFactoryTest extends \PHPUnit_Framework_TestCase
             'doctrine' => [
                 'documentmanager' => [
                     'odm_default' => [
-                        'connection'    => Connection::class,
+                        'connection'    => Client::class,
                         'configuration' => Configuration::class,
                         'eventmanager'  => EventManager::class,
                     ],
@@ -66,9 +69,11 @@ class DocumentManagerFactoryTest extends \PHPUnit_Framework_TestCase
             ],
         ];
 
-        $connection = $this->prophesize(Connection::class);
+        $connection = $this->prophesize(Client::class);
         $configuration = $this->prophesize(Configuration::class);
         $eventManager = $this->prophesize(EventManager::class);
+        $lazyLoadingGhostFactory = $this->prophesize(LazyLoadingGhostFactory::class);
+        $repositoryFactory = $this->prophesize(RepositoryFactory::class);
 
         $configuration->getClassMetadataFactoryName()->willReturn(ClassMetadataFactory::class);
         $configuration->getMetadataCacheImpl()->willReturn(null);
@@ -79,11 +84,15 @@ class DocumentManagerFactoryTest extends \PHPUnit_Framework_TestCase
         $configuration->getProxyDir()->willReturn('/tmp/proxy');
         $configuration->getProxyNamespace()->willReturn('\Proxy');
         $configuration->getAutoGenerateProxyClasses()->willReturn(false);
+        $configuration->buildGhostObjectFactory()->willReturn($lazyLoadingGhostFactory);
+        $configuration->getRepositoryFactory()->willReturn($repositoryFactory);
+
+        $connection->getTypeMap()->willReturn(DocumentManager::CLIENT_TYPEMAP);
 
         $this->container->has('doctrine')->willReturn(false);
         $this->container->has('config')->willReturn(true);
         $this->container->get('config')->willReturn($options);
-        $this->container->get(Connection::class)->willReturn($connection->reveal());
+        $this->container->get(Client::class)->willReturn($connection->reveal());
         $this->container->get(Configuration::class)->willReturn($configuration->reveal());
         $this->container->get(EventManager::class)->willReturn($eventManager->reveal());
 
