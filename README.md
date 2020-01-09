@@ -15,9 +15,17 @@ We recommend using a dependency injection container, and typehint against [PSR-1
 ## Installation
 
 Install this library using composer:
-
+In composer.json
+```
+"repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/babarinde/doctrine-mongo-odm"
+        }
+    ]
+```
 ```bash
-$ composer require helderjs/doctrine-mongo-odm
+$ composer require helderjs/doctrine-mongo-odm:dev-mongo-odm-2.0
 ```
 
 ## Configuration
@@ -27,99 +35,65 @@ How to create the config file (What you should/can put in the config).
 ```php
 return [
     'config' => [
-        ...
-        'doctrine' => [
-            'default' => 'odm_default',
-            'connection' => [
-                'odm_default' => [
-                    'server'           => 'localhost',
-                    'port'             => '27017',
-                    'user'             => 'myUser',
-                    'password'         => 'myHardPassword',
-                    'dbname'           => 'dbName',
-                    'options'          => []
-                ],
-                'odm_secondary' => [
-                    'connectionString' => 'mongodb://username:password@server2:27017/mydb',
-                    'options'          => []
-                ],
+    'doctrine' => [
+        'default' => 'odm_default',
+        'connection' => [
+            'odm_default' => [
+                'server'           => 'expressiveDB',
+                'port'             => '27017',
+                'user'             => 'testUser',
+                'password'         => 'testPass',
+                'dbname'           => 'testDB',
+                'options'          => [],
             ],
-            'driver' => [
-                'odm_default' => [
-                    \Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver::class => [
-                        'documents_dir' => ['./src/myApp/Documents']
-                    ], 
-                    \Doctrine\ODM\MongoDB\Mapping\Driver\XmlDriver::class => [
-                        'simplified' => false,
-                        'xml_dir' => [
-                            '/path/to/files1',
-                            '/path/to/files2',
-                        ]
-                     ],
-                    \Doctrine\ODM\MongoDB\Mapping\Driver\YamlDriver::class => [
-                        'simplified' => false,
-                        'yml_dir' => [
-                            '/path/to/files1',
-                            '/path/to/files2',
-                        ]
-                    ],
-                    \Doctrine\ODM\MongoDB\Mapping\Driver\MappingDriverChain::class => [
-                        'Driver\Annotation' => \Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver::class,
-                        'Driver\Xml' => \Doctrine\ODM\MongoDB\Mapping\Driver\XmlDriver::class,
-                        'Driver\Yaml' => \Doctrine\ODM\MongoDB\Mapping\Driver\YamlDriver::class,
-                    ],
-                ],
-            ],
-            'configuration' => [
-                'odm_default' => [
-                    'metadata_cache'     => \Doctrine\Common\Cache\ArrayCache::class, // optional
-                    'driver'             => \Doctrine\ODM\MongoDB\Mapping\Driver\MappingDriverChain::class,
-                    'generate_proxies'   => true,
-                    'proxy_dir'          => 'data/DoctrineMongoODMModule/Proxy',
-                    'proxy_namespace'    => 'DoctrineMongoODMModule\Proxy',
-                    'generate_hydrators' => true,
-                    'hydrator_dir'       => 'data/DoctrineMongoODMModule/Hydrator',
-                    'hydrator_namespace' => 'DoctrineMongoODMModule\Hydrator',
-                    'default_db'         => 'MyDBName',
-                    'filters'            => [], // custom filters (optional)
-                    'types'              => [], // custom types (optional)
-                    'retry_connect'      => 0 // optional
-                    'retry_query'        => 0 // optional
-                    'logger'             => \MyLogger::calss \\ Logger implementation (optional)
-                    'classMetadataFactoryName' => 'stdClass' \\ optional
-                ]
-            ],
-            'documentmanager' => [
-                'odm_default' => [
-                    'connection'    => \Doctrine\ODM\MongoDB\Connection::class,
-                    'configuration' => \Doctrine\ODM\MongoDB\Configuration::class,
-                    'eventmanager'  => \Doctrine\ODM\MongoDB\EventManager::class, \\ optional
-                ],
-                'odm_secondary' => [
-                    'connection'    => 'doctrine.connection.secondary',
-                    'configuration' => \Doctrine\ODM\MongoDB\Configuration::class,
-                    'eventmanager'  => 'doctrine.eventmanager.secondary', \\ optional
-                ]
-            ],
-            'eventmanager' => [ \\ optional
-                'odm_default' => [
-                    'subscribers' => [
-                        \MySubscriberImpl1::class,
-                    ],
-                ],
-                'odm_secondary' => [
-                    'subscribers' => [
-                        new \MySubscriberImpl2(),
-                    ],
-                ],
-            ],
+            // 'odm_secondary' => [
+            //     'connectionString' => 'mongodb://username:password@server2:27017/mydb',
+            //     'options'          => []
+            // ],
         ],
-        ...
-    ],
+        'configuration' => [
+            'odm_default' => [
+                'metadata_cache'     => ArrayCache::class, // optional
+                'driver'             => MappingDriver::class,
+                'generate_proxies'   => Configuration::AUTOGENERATE_FILE_NOT_EXISTS,
+                'proxy_dir'          => 'data/DoctrineMongoODMModule/Proxy',
+                'proxy_namespace'    => 'DoctrineMongoODMModule\Proxy',
+                'generate_hydrators' => Configuration::AUTOGENERATE_FILE_NOT_EXISTS,
+                'hydrator_dir'       => 'data/DoctrineMongoODMModule/Hydrator',
+                'hydrator_namespace' => 'DoctrineMongoODMModule\Hydrator',
+                'default_db'         => 'testDB',
+                // 'filters'            => [], // custom filters (optional)
+                // 'types'              => [], // custom types (optional)
+                // 'metadata_factory_name' => 'stdClass' \\ optional
+            ]
+        ],
+        'documentmanager' => [
+            'odm_default' => [
+                'connection'    => \MongoDB\Client::class,
+                'configuration' => \Doctrine\ODM\MongoDB\Configuration::class,
+                // 'eventmanager'  => \Doctrine\ODM\MongoDB\EventManager::class, \\ optional
+            ],
+            // 'odm_secondary' => [
+            //     'connection'    => 'doctrine.connection.secondary',
+            //     'configuration' => \Doctrine\ODM\MongoDB\Configuration::class,
+            //     'eventmanager'  => 'doctrine.eventmanager.secondary', \\ optional
+            // ]
+        ],
+        'driver' => [
+            'odm_default' => [
+                AnnotationDriver::class => [
+                    'documents_dir' => [
+                         './src/MyApp/Documents' // not sure if this is still necessary, works without it though
+                    ]
+                ]
+            ]
+        ]
+    ]
+],
 ];
 ```
 
-Configuring DI at Zend Expressive
+Configuring DI at Mezzio
 ```php
 ...
 'dependencies' => [
@@ -129,19 +103,31 @@ Configuring DI at Zend Expressive
     ],
     'factories' => [
         \Doctrine\ODM\MongoDB\Configuration::class   => ConfigurationFactory::class,
-        \Doctrine\ODM\MongoDB\Connection::class      => ConnectionFactory::class,
+        \MongoDB\Client::class      => ConnectionFactory::class,
         \Doctrine\ODM\MongoDB\EventManager::class    => EventManagerFactory::class,
         \Doctrine\ODM\MongoDB\DocumentManager::class => DocumentManagerFactory::class,
-        'doctrine.connection.secondary'              => new ConnectionFactory('odm_secondary'),
-        'doctrine.eventmanager.secondary'            => new EventManagerFactory('odm_secondary'),
-        'doctrine.documentmandager.secondary'        => new DocumentManagerFactory('odm_secondary'),
-        \Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver::class   => \Helderjs\Component\DoctrineMongoODM\AnnotationDriverFactory::class,
-        \Doctrine\ODM\MongoDB\Mapping\Driver\XmlDriver::class          => \Helderjs\Component\DoctrineMongoODM\AnnotationDriverFactory::class,
-        \Doctrine\ODM\MongoDB\Mapping\Driver\YamlDriver::class         => \Helderjs\Component\DoctrineMongoODM\AnnotationDriverFactory::class,
-        \Doctrine\ODM\MongoDB\Mapping\Driver\MappingDriverChain::class => \Helderjs\Component\DoctrineMongoODM\AnnotationDriverFactory::class,
+        // 'doctrine.connection.secondary'              => new ConnectionFactory('odm_secondary'),
+        // 'doctrine.eventmanager.secondary'            => new EventManagerFactory('odm_secondary'),
+        // 'doctrine.documentmandager.secondary'        => new DocumentManagerFactory('odm_secondary'),
+        // \Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver::class   => \Helderjs\Component\DoctrineMongoODM\AnnotationDriverFactory::class,
+        // \Doctrine\ODM\MongoDB\Mapping\Driver\XmlDriver::class          => \Helderjs\Component\DoctrineMongoODM\AnnotationDriverFactory::class,
+        // \Doctrine\ODM\MongoDB\Mapping\Driver\YamlDriver::class         => \Helderjs\Component\DoctrineMongoODM\AnnotationDriverFactory::class,
+        // \Doctrine\ODM\MongoDB\Mapping\Driver\MappingDriverChain::class => \Helderjs\Component\DoctrineMongoODM\AnnotationDriverFactory::class,
     ],
  ],
  ...
+ Register document namespace in Composer
+ "autoload": {
+        "psr-4": {
+            "MyApp\\Document\\": "src/MyApp/Document"
+        }
+    }
+Bootstrap in public/index.php:
+change
+require 'vendor/autoload.php';
+to
+$loader = require 'vendor/autoload.php';
+Doctrine\Common\Annotations\AnnotationRegistry::registerLoader([$loader,'loadClass']);
 ```
 
 SlimPHP
