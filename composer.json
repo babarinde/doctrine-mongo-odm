@@ -19,6 +19,12 @@
       "email": "contato@heldersantana.net"
     }
   ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/babarinde/mongodb-odm"
+    }
+  ],
   "require": {
     "php": "^7.2",
     "psr/container": "^1.0",
