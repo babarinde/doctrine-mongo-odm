@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Helderjs\Component\DoctrineMongoODM;
+namespace Helderjs\Component\Decorator\DoctrineMongoODM;
 
 use Doctrine\Common\EventManager;
 use Doctrine\ODM\MongoDB\Aggregation\Builder as AggregationBuilder;
