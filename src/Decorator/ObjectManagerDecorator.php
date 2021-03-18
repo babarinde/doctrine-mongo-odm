@@ -1,6 +1,6 @@
 <?php
 
-namespace Helderjs\Component\Decorator\DoctrineMongoODM;
+namespace Helderjs\Component\DoctrineMongoODM\Decorator;
 use Doctrine\Persistence\ObjectManager;
 
 use function class_exists;
